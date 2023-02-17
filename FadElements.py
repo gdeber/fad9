@@ -16,7 +16,7 @@ class ModButton:
         return ', ' '\n'.join("%s: %s" % item for item in sorted(self.__dict__.items(), key=lambda i: i[0])) 
 
     def pack(self) -> bytes:
-        return struct.pack(fmt, 
+        return struct.pack(self.fmt, 
         self._type,
         self._beh,
         self._cc,
@@ -38,7 +38,7 @@ class TransportButton:
         return ', ' '\n'.join("%s: %s" % item for item in sorted(self.__dict__.items(), key=lambda i: i[0])) 
 
     def pack(self) -> bytes:
-        return struct.pack(fmt, 
+        return struct.pack(self.fmt, 
         self._type,
         self._cc,
         self._beh,
@@ -98,7 +98,7 @@ class Scene:
         return ', ' '\n'.join("%s: %s" % item for item in sorted(self.__dict__.items(), key=lambda i: i[0])) 
 
     def pack(self) -> bytes:
-        return struct.pack(fmt, 
+        return struct.pack(self.fmt, 
         self._scene_channel,
         self._scene_name,
         self._mod1.pack(),
@@ -144,6 +144,17 @@ class Scene:
         """Yield successive n-sized chunks from lst."""
         for i in range(0, len(lst), n):
             yield lst[i:i + n]
+
+    @classmethod
+    def pack_scenes(cls, scene1, scene2, scene3, scene4) -> list:
+        all_data = []
+        all_data += scene1.pack()
+        all_data += scene2.pack()
+        all_data += scene3.pack()
+        all_data += scene4.pack()
+        all_data += [0x00] * (0x400 - len(all_data))
+        return all_data
+
 
 
 if __name__ == '__main__':
