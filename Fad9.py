@@ -69,11 +69,13 @@ class Fad9:
         if len(scene_data) < 0x400:
             raise ValueError("scene data too small")
         
-        self._send_msg(FadMessages.CMD_READ_SCENE)
+        self._send_msg(FadMessages.CMD_WRITE_SCENE)
+        self._send_msg(FadMessages.CMD_WRITE_SCENE_2)
         self._receive_one()
         for idx, byte_to_send in enumerate(scene_data):
             high, low = byte_to_send >> 4, byte_to_send & 0x0F
             _write_msg = mido.Message.from_bytes([0x90, high, low])
+            self._send_msg(_write_msg)
             if idx == 0x200:
                 msg = self._receive_one()
                 if msg != FadMessages.CMD_READ_SCENE:
@@ -99,9 +101,12 @@ class Fad9:
     def _send_msg(self, message):
         logging.debug(f"SEND: {message.hex()}")
         self._outport.send(message)
-
-    def close(self):
+    
+    def send_end(self):
         _end = FadMessages.CMD_END
         self._send_msg(_end)
+
+    def close(self):
+        self.send_end()
         self._inport.close()
         self._outport.close()
